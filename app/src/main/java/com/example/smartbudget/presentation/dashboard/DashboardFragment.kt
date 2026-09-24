@@ -1,220 +1,145 @@
 package com.example.smartbudget.presentation.dashboard
 
+import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.smartbudget.databinding.FragmentDashboardBinding
-import com.example.smartbudget.presentation.common.BaseFragment
-import com.example.smartbudget.presentation.common.UiState
-import com.example.smartbudget.presentation.common.collectInLifecycle
-import com.example.smartbudget.presentation.common.hide
-import com.example.smartbudget.presentation.common.show
+import androidx.navigation.fragment.findNavController
+import com.example.smartbudget.R
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.card.MaterialCardView
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
-/**
- * Dashboard Fragment showing financial overview
- */
 @AndroidEntryPoint
-class DashboardFragment : BaseFragment<FragmentDashboardBinding, DashboardViewModel>() {
+class DashboardFragment : Fragment() {
     
-    override val viewModel: DashboardViewModel by viewModels()
+    private val viewModel: DashboardViewModel by viewModels()
     
-    private lateinit var transactionAdapter: RecentTransactionAdapter
+    private lateinit var greetingText: TextView
+    private lateinit var refreshIcon: ImageView
+    private lateinit var notificationIcon: ImageView
+    private lateinit var balanceAmount: TextView
+    private lateinit var balanceChange: TextView
+    private lateinit var visibilityToggle: ImageView
+    private lateinit var incomeAmount: TextView
+    private lateinit var expensesAmount: TextView
+    private lateinit var seeAllButton: TextView
+    private lateinit var emptyStateText: TextView
+    private lateinit var bottomNavigation: BottomNavigationView
     
-    override fun getViewBinding(
+    private var isBalanceVisible = false
+    
+    override fun onCreateView(
         inflater: LayoutInflater,
-        container: ViewGroup?
-    ) = FragmentDashboardBinding.inflate(inflater, container, false)
-    
-    override fun setupUI() {
-        setupToolbar()
-        setupRecyclerView()
-        setupClickListeners()
-        setupSwipeRefresh()
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_dashboard, container, false)
     }
     
-    private fun setupToolbar() {
-        binding.apply {
-            // Sync button
-            ivSync.setOnClickListener {
-                viewModel.refresh()
-            }
-            
-            // Profile/Settings
-            ivProfile.setOnClickListener {
-                viewModel.navigateToSettings()
-            }
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        initViews(view)
+        setupListeners()
+        setupGreeting()
     }
     
-    private fun setupRecyclerView() {
-        transactionAdapter = RecentTransactionAdapter(
-            onTransactionClick = { transaction ->
-                when (transaction) {
-                    is com.example.smartbudget.domain.model.Transaction.ExpenseTransaction -> {
-                        viewModel.navigateToTransactionDetail(transaction.id, isExpense = true)
-                    }
-                    is com.example.smartbudget.domain.model.Transaction.IncomeTransaction -> {
-                        viewModel.navigateToTransactionDetail(transaction.id, isExpense = false)
-                    }
-                }
-            }
-        )
+    private fun initViews(view: View) {
+        greetingText = view.findViewById(R.id.greetingText)
+        refreshIcon = view.findViewById(R.id.refreshIcon)
+        notificationIcon = view.findViewById(R.id.notificationIcon)
+        balanceAmount = view.findViewById(R.id.balanceAmount)
+        balanceChange = view.findViewById(R.id.balanceChange)
+        visibilityToggle = view.findViewById(R.id.visibilityToggle)
+        incomeAmount = view.findViewById(R.id.incomeAmount)
+        expensesAmount = view.findViewById(R.id.expensesAmount)
+        seeAllButton = view.findViewById(R.id.seeAllButton)
+        emptyStateText = view.findViewById(R.id.emptyStateText)
+        bottomNavigation = view.findViewById(R.id.bottomNavigation)
         
-        binding.rvRecentTransactions.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = transactionAdapter
-            setHasFixedSize(true)
-        }
+        // Set initial values
+        balanceAmount.text = "****"
+        balanceChange.text = "+0.0%"
+        incomeAmount.text = "$0.00"
+        expensesAmount.text = "$0.00"
+        emptyStateText.text = "No transactions yet"
     }
     
-    private fun setupClickListeners() {
-        binding.apply {
-            // Balance card click to toggle visibility
-            cvBalance.setOnClickListener {
-                viewModel.toggleBalanceVisibility()
-            }
-            
-            // Income card
-            cvIncome.setOnClickListener {
-                viewModel.navigateToAddIncome()
-            }
-            
-            // Expense card
-            cvExpense.setOnClickListener {
-                viewModel.navigateToAddExpense()
-            }
-            
-            // See all transactions
-            tvSeeAll.setOnClickListener {
-                viewModel.navigateToTransactions()
-            }
-            
-            // FAB for add expense
-            fabAddExpense.setOnClickListener {
-                viewModel.navigateToAddExpense()
+    private fun setupListeners() {
+        // Refresh icon
+        refreshIcon.setOnClickListener {
+            // TODO: Implement refresh
+        }
+        
+        // Notification icon
+        notificationIcon.setOnClickListener {
+            // TODO: Navigate to notifications
+        }
+        
+        // Toggle balance visibility
+        visibilityToggle.setOnClickListener {
+            isBalanceVisible = !isBalanceVisible
+            if (isBalanceVisible) {
+                balanceAmount.text = "$0.00" // TODO: Show actual balance
+                visibilityToggle.setImageResource(android.R.drawable.ic_menu_view)
+            } else {
+                balanceAmount.text = "****"
+                visibilityToggle.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             }
         }
+        
+        // See all transactions
+        seeAllButton.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_transactions)
+        }
+        
+        // Bottom navigation
+        setupBottomNavigation()
     }
     
-    private fun setupSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refresh()
-        }
-    }
-    
-    override fun observeData() {
-        // User data
-        viewModel.user.collectInLifecycle(viewLifecycleOwner) { state ->
-            when (state) {
-                is UiState.Success -> {
-                    binding.tvGreeting.text = "${viewModel.getGreeting()},\n${state.data.fullName}"
+    private fun setupBottomNavigation() {
+        bottomNavigation.selectedItemId = R.id.navigation_home
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> true
+                R.id.navigation_transactions -> {
+                    findNavController().navigate(R.id.action_dashboard_to_transactions)
+                    true
                 }
-                is UiState.Error -> {
-                    binding.tvGreeting.text = viewModel.getGreeting()
+                R.id.navigation_add -> {
+                    findNavController().navigate(R.id.action_dashboard_to_add_expense)
+                    true
                 }
-                else -> {}
+                R.id.navigation_reports -> {
+                    findNavController().navigate(R.id.action_dashboard_to_reports)
+                    true
+                }
+                R.id.navigation_settings -> {
+                    findNavController().navigate(R.id.action_dashboard_to_settings)
+                    true
+                }
+                else -> false
             }
-        }
-        
-        // Financial summary
-        viewModel.financialSummary.collectInLifecycle(viewLifecycleOwner) { state ->
-            when (state) {
-                is UiState.Loading -> {
-                    binding.progressBar.show()
-                }
-                is UiState.Success -> {
-                    binding.progressBar.hide()
-                    updateFinancialSummary()
-                }
-                is UiState.Error -> {
-                    binding.progressBar.hide()
-                    showSnackbar("Failed to load data: ${state.message}")
-                }
-                else -> {}
-            }
-        }
-        
-        // Recent transactions
-        viewModel.recentTransactions.collectInLifecycle(viewLifecycleOwner) { state ->
-            when (state) {
-                is UiState.Loading -> {
-                    // Show loading in recyclerview
-                }
-                is UiState.Success -> {
-                    transactionAdapter.submitList(state.data)
-                    
-                    // Show/hide empty state
-                    if (state.data.isEmpty()) {
-                        binding.tvEmptyTransactions.show()
-                        binding.rvRecentTransactions.hide()
-                    } else {
-                        binding.tvEmptyTransactions.hide()
-                        binding.rvRecentTransactions.show()
-                    }
-                }
-                is UiState.Error -> {
-                    showSnackbar("Failed to load transactions")
-                }
-                else -> {}
-            }
-        }
-        
-        // Refresh state
-        viewModel.isRefreshing.collectInLifecycle(viewLifecycleOwner) { isRefreshing ->
-            binding.swipeRefresh.isRefreshing = isRefreshing
-        }
-        
-        // Balance visibility
-        viewModel.balanceVisible.collectInLifecycle(viewLifecycleOwner) { visible ->
-            updateBalanceVisibility(visible)
-        }
-        
-        // Formatted values
-        viewModel.formattedBalance.collectInLifecycle(viewLifecycleOwner) { balance ->
-            binding.tvBalance.text = balance
-        }
-        
-        viewModel.formattedTotalIncome.collectInLifecycle(viewLifecycleOwner) { income ->
-            binding.tvIncomeAmount.text = income
-        }
-        
-        viewModel.formattedTotalExpenses.collectInLifecycle(viewLifecycleOwner) { expenses ->
-            binding.tvExpenseAmount.text = expenses
-        }
-        
-        viewModel.balanceChangePercentage.collectInLifecycle(viewLifecycleOwner) { percentage ->
-            binding.tvBalanceChange.text = percentage
-        }
-        
-        viewModel.balanceChangePositive.collectInLifecycle(viewLifecycleOwner) { positive ->
-            binding.tvBalanceChange.setTextColor(
-                if (positive) {
-                    requireContext().getColor(android.R.color.holo_green_dark)
-                } else {
-                    requireContext().getColor(android.R.color.holo_red_dark)
-                }
-            )
         }
     }
     
-    private fun updateFinancialSummary() {
-        // Values are automatically updated via StateFlow collectors above
-        Timber.d("Financial summary updated")
-    }
-    
-    private fun updateBalanceVisibility(visible: Boolean) {
-        if (visible) {
-            binding.ivBalanceVisibility.setImageResource(android.R.drawable.ic_menu_view)
-        } else {
-            binding.ivBalanceVisibility.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-            binding.tvBalance.text = "****"
+    private fun setupGreeting() {
+        val calendar = Calendar.getInstance()
+        val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
+        
+        val greeting = when (hourOfDay) {
+            in 0..11 -> "Good morning"
+            in 12..16 -> "Good afternoon"
+            else -> "Good evening"
         }
-    }
-    
-    override fun onLoadingStateChanged(isLoading: Boolean) {
-        // Handled by progress bar in financial summary observer
+        
+        greetingText.text = greeting
     }
 }

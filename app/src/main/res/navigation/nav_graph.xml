@@ -116,19 +116,63 @@
     <fragment
         android:id="@+id/transactionsFragment"
         android:name="com.example.smartbudget.presentation.transactions.TransactionsFragment"
-        android:label="Transactions" />
+        android:label="Transactions">
+        <action
+            android:id="@+id/action_transactions_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_transactions_to_addExpense"
+            app:destination="@id/addEditExpenseFragment" />
+        <action
+            android:id="@+id/action_transactions_to_reports"
+            app:destination="@id/reportsFragment" />
+        <action
+            android:id="@+id/action_transactions_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <!-- Reports -->
     <fragment
         android:id="@+id/reportsFragment"
         android:name="com.example.smartbudget.presentation.reports.ReportsFragment"
-        android:label="Reports" />
+        android:label="Reports">
+        <action
+            android:id="@+id/action_reports_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_reports_to_transactions"
+            app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_reports_to_addExpense"
+            app:destination="@id/addEditExpenseFragment" />
+        <action
+            android:id="@+id/action_reports_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <!-- Settings -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.smartbudget.presentation.settings.SettingsFragment"
         android:label="Settings">
+        <action
+            android:id="@+id/action_settings_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_settings_to_transactions"
+            app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_settings_to_addExpense"
+            app:destination="@id/addEditExpenseFragment" />
+        <action
+            android:id="@+id/action_settings_to_reports"
+            app:destination="@id/reportsFragment" />
         <action
             android:id="@+id/action_settings_to_login"
             app:destination="@id/loginFragment"
