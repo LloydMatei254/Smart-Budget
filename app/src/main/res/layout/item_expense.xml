@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Expense Description -->
+        <TextView
+            android:id="@+id/tvExpenseDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/tvExpenseAmount"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Grocery Shopping"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Grocery Shopping" />
+
+        <!-- Category -->
+        <TextView
+            android:id="@+id/tvExpenseCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvExpenseDescription"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="4dp"
+            android:text="Food"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            tools:text="Food" />
+
+        <!-- Date -->
+        <TextView
+            android:id="@+id/tvExpenseDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvExpenseCategory"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="4dp"
+            android:text="Jan 15"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            tools:text="Jan 15" />
+
+        <!-- Notes Indicator -->
+        <ImageView
+            android:id="@+id/ivNotesIndicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_below="@id/tvExpenseCategory"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/tvExpenseDate"
+            android:contentDescription="Has notes"
+            android:src="@android:drawable/ic_menu_info_details"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Receipt Indicator -->
+        <ImageView
+            android:id="@+id/ivReceiptIndicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_below="@id/tvExpenseCategory"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/ivNotesIndicator"
+            android:contentDescription="Has receipt"
+            android:src="@android:drawable/ic_menu_camera"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Amount -->
+        <TextView
+            android:id="@+id/tvExpenseAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:text="$123.45"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="$123.45" />
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>
